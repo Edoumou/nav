@@ -30,7 +30,7 @@ contract MockFunctionsRouter {
      * @param response   ABI-encoded response (uint256 nav value).
      * @param err        Error bytes (pass "0x" for success).
      */
-    function fulfil(
+    function fulfill(
         address consumer,
         bytes32 requestId,
         bytes calldata response,

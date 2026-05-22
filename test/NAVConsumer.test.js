@@ -3,7 +3,7 @@
  *
  * These tests run on the local Hardhat network.
  * Chainlink Functions callbacks are mocked by deploying a MockFunctionsRouter
- * that immediately fulfils requests, so no real DON is required.
+ * that immediately fulfills requests, so no real DON is required.
  */
 
 const { expect } = require("chai");
@@ -12,7 +12,7 @@ const { ethers } = require("hardhat");
 // Minimal mock router ABI used below
 const MOCK_ROUTER_ABI = [
   "function sendRequest(uint64 subscriptionId, bytes calldata data, uint16 dataVersion, uint32 callbackGasLimit, bytes32 donId) external returns (bytes32)",
-  "function fulfil(address consumer, bytes32 requestId, bytes calldata response, bytes calldata err) external",
+  "function fulfill(address consumer, bytes32 requestId, bytes calldata response, bytes calldata err) external",
 ];
 
 describe("NAVConsumer", function () {
@@ -52,7 +52,7 @@ describe("NAVConsumer", function () {
       expect(await navConsumer.owner()).to.equal(owner.address);
     });
 
-    it("initialises nav to 0", async function () {
+    it("initializes nav to 0", async function () {
       expect(await navConsumer.nav()).to.equal(0n);
     });
 
@@ -175,8 +175,8 @@ describe("NAVConsumer", function () {
         [newNAV]
       );
 
-      // Call the mock router to fulfil the request
-      const fulfillTx = await mockRouter.fulfil(
+      // Call the mock router to fulfill the request
+      const fulfillTx = await mockRouter.fulfill(
         await navConsumer.getAddress(),
         requestId,
         response,
@@ -200,7 +200,7 @@ describe("NAVConsumer", function () {
       const newNAV = ethers.parseEther("100");
       const response = ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [newNAV]);
 
-      await expect(mockRouter.fulfil(await navConsumer.getAddress(), requestId, response, "0x"))
+      await expect(mockRouter.fulfill(await navConsumer.getAddress(), requestId, response, "0x"))
         .to.emit(navConsumer, "NAVUpdated")
         .withArgs(newNAV, requestId);
     });
@@ -218,7 +218,7 @@ describe("NAVConsumer", function () {
       const errorBytes = ethers.toUtf8Bytes("fetch failed");
 
       await expect(
-        mockRouter.fulfil(await navConsumer.getAddress(), requestId, "0x", errorBytes)
+        mockRouter.fulfill(await navConsumer.getAddress(), requestId, "0x", errorBytes)
       )
         .to.emit(navConsumer, "NAVUpdateFailed")
         .withArgs(requestId, ethers.hexlify(errorBytes));
@@ -235,13 +235,13 @@ describe("NAVConsumer", function () {
 
       const requestId = event.args.requestId;
 
-      // First fulfil with a real value
+      // First fulfill with a real value
       const firstNAV = ethers.parseEther("50");
       const response = ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [firstNAV]);
-      await mockRouter.fulfil(await navConsumer.getAddress(), requestId, response, "0x");
+      await mockRouter.fulfill(await navConsumer.getAddress(), requestId, response, "0x");
       expect(await navConsumer.nav()).to.equal(firstNAV);
 
-      // Second request, fulfil with error
+      // Second request, fulfill with error
       const tx2 = await navConsumer.requestNAVUpdate();
       const receipt2 = await tx2.wait();
       const event2 = receipt2.logs
@@ -250,7 +250,7 @@ describe("NAVConsumer", function () {
         })
         .find((e) => e && e.name === "NAVUpdateRequested");
 
-      await mockRouter.fulfil(
+      await mockRouter.fulfill(
         await navConsumer.getAddress(),
         event2.args.requestId,
         "0x",

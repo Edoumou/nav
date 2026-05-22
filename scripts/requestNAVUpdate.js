@@ -79,7 +79,7 @@ async function main() {
   // ── Wait for fulfillment ──────────────────────────────────────────────────
 
   console.log(
-    "\nWaiting for Chainlink DON to fulfil the request (up to 5 minutes)..."
+    "\nWaiting for Chainlink DON to fulfill the request (up to 5 minutes)..."
   );
   console.log(
     "(On a local Hardhat network fulfillment will NOT occur automatically)"
