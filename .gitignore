@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Hardhat artifacts and cache
+artifacts/
+cache/
+typechain-types/
+
+# Environment secrets – never commit
+.env
+
+# Deployment info (contains addresses, re-generate with deploy script)
+deployment.json
+
+# Editor / OS
+.DS_Store
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
