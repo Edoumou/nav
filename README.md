@@ -16,7 +16,7 @@ A complete Hardhat project that demonstrates how to:
 │  ┌─────────────────┐   increment/decrement   ┌──────────────────┐  │
 │  │  walletListener │ ──────────────────────→ │  Express Backend │  │
 │  │  (ETH + ERC-20) │                         │  GET/POST /nav   │  │
-│  └─────────────────┘                         │  (JSON store)    │  │
+│  └─────────────────┘                         │  (Supabase)      │  │
 │                                              └────────┬─────────┘  │
 │                                                       │ GET /nav    │
 │                                           ┌───────────▼──────────┐ │
@@ -37,7 +37,7 @@ A complete Hardhat project that demonstrates how to:
 |------|-------|--------|
 | 1 | Monitored wallet receives ETH/ERC-20 | `walletListener.js` detects inflow |
 | 2 | walletListener | `POST /nav/increment` with transferred amount |
-| 3 | Backend | Persists new NAV in `nav.json` |
+| 3 | Backend | Persists new NAV in Supabase |
 | 4 | Owner (or keeper) | Calls `requestNAVUpdate()` on contract |
 | 5 | Chainlink DON | Executes `fetchNAV.js` → `GET /nav` → returns NAV |
 | 6 | Contract | `fulfillRequest` decodes the value, sets `nav` |
@@ -56,7 +56,7 @@ nav/
 │   └── fetchNAV.js                  # JS source executed by the DON
 ├── backend/
 │   ├── server.js                    # Express API for NAV storage
-│   └── db.js                        # JSON file storage
+│   └── db.js                        # Supabase NAV storage
 ├── scripts/
 │   ├── deploy.js                    # Deploys NAVConsumer
 │   ├── requestNAVUpdate.js          # Triggers a Functions request
@@ -112,11 +112,28 @@ Key variables:
 | `CHAINLINK_ROUTER` | Functions router address (Sepolia default pre-filled) |
 | `CHAINLINK_DON_ID` | DON ID (Sepolia default pre-filled) |
 | `NAV_API_URL` | URL the DON fetches NAV from (must be publicly reachable for testnet) |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key used by the backend |
+| `SUPABASE_TABLE` | Supabase table storing NAV (`nav_store` by default) |
+| `SUPABASE_NAV_ROW_ID` | Single row id used by the backend (`1` by default) |
 | `MONITORED_WALLET` | Address whose transactions update NAV |
 | `LISTENER_RPC_URL` | WebSocket or HTTP RPC for the wallet listener |
 | `ERC20_ADDRESSES` | Comma-separated ERC-20 contract addresses to watch |
 
-### 3. Compile contracts
+### 3. Create the Supabase table
+
+Create a table in Supabase (SQL editor):
+
+```sql
+create table if not exists public.nav_store (
+  id integer primary key,
+  nav text not null default '0'
+);
+```
+
+If you use a custom table name, set `SUPABASE_TABLE` to match.
+
+### 4. Compile contracts
 
 ```bash
 npm run compile

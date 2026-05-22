@@ -9,9 +9,6 @@ typechain-types/
 # Environment secrets – never commit
 .env
 
-# JSON storage file created by the backend
-backend/nav.json
-
 # Deployment info (contains addresses, re-generate with deploy script)
 deployment.json
 

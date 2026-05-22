@@ -32,9 +32,9 @@ app.get("/health", (_req, res) => {
 });
 
 /** GET /nav – return current NAV */
-app.get("/nav", (_req, res) => {
+app.get("/nav", async (_req, res) => {
   try {
-    const nav = getNav();
+    const nav = await getNav();
     res.json({ nav: nav.toString() });
   } catch (err) {
     console.error("[GET /nav] Error:", err.message);
@@ -43,14 +43,14 @@ app.get("/nav", (_req, res) => {
 });
 
 /** POST /nav/set – set absolute NAV */
-app.post("/nav/set", (req, res) => {
+app.post("/nav/set", async (req, res) => {
   const { nav } = req.body;
   if (nav === undefined || nav === null) {
     return res.status(400).json({ error: "Missing 'nav' in request body" });
   }
   try {
-    setNav(nav);
-    const current = getNav();
+    await setNav(nav);
+    const current = await getNav();
     console.log(`[POST /nav/set] NAV set to ${current}`);
     res.json({ nav: current.toString() });
   } catch (err) {
@@ -60,14 +60,14 @@ app.post("/nav/set", (req, res) => {
 });
 
 /** POST /nav/increment – add delta to NAV */
-app.post("/nav/increment", (req, res) => {
+app.post("/nav/increment", async (req, res) => {
   const { delta } = req.body;
   if (delta === undefined || delta === null) {
     return res.status(400).json({ error: "Missing 'delta' in request body" });
   }
   try {
-    incrementNav(delta);
-    const current = getNav();
+    await incrementNav(delta);
+    const current = await getNav();
     console.log(`[POST /nav/increment] NAV incremented by ${delta} → ${current}`);
     res.json({ nav: current.toString() });
   } catch (err) {
@@ -77,14 +77,14 @@ app.post("/nav/increment", (req, res) => {
 });
 
 /** POST /nav/decrement – subtract delta from NAV */
-app.post("/nav/decrement", (req, res) => {
+app.post("/nav/decrement", async (req, res) => {
   const { delta } = req.body;
   if (delta === undefined || delta === null) {
     return res.status(400).json({ error: "Missing 'delta' in request body" });
   }
   try {
-    decrementNav(delta);
-    const current = getNav();
+    await decrementNav(delta);
+    const current = await getNav();
     console.log(`[POST /nav/decrement] NAV decremented by ${delta} → ${current}`);
     res.json({ nav: current.toString() });
   } catch (err) {

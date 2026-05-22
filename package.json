@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@chainlink/contracts": "^1.2.0",
+    "@supabase/supabase-js": "^2.106.1",
     "axios": "^1.6.7",
     "dotenv": "^16.4.1",
     "ethers": "^6.11.1",
