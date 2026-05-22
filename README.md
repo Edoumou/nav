@@ -114,8 +114,8 @@ Key variables:
 | `NAV_API_URL` | URL the DON fetches NAV from (must be publicly reachable for testnet) |
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key used by the backend (Dashboard → Project Settings → API → `service_role`) |
-| `SUPABASE_TABLE` | Supabase table storing NAV (`nav_store` by default) |
-| `SUPABASE_NAV_ROW_ID` | Single row id used by the backend (the row's `id` value, `1` by default) |
+| `SUPABASE_TABLE` | Supabase table name where NAV is stored (`nav_store` by default) |
+| `SUPABASE_NAV_ROW_ID` | `id` value of the row in `SUPABASE_TABLE` that stores NAV (`1` by default) |
 | `MONITORED_WALLET` | Address whose transactions update NAV |
 | `LISTENER_RPC_URL` | WebSocket or HTTP RPC for the wallet listener |
 | `ERC20_ADDRESSES` | Comma-separated ERC-20 contract addresses to watch |
@@ -132,6 +132,10 @@ create table if not exists public.nav_store (
 ```
 
 If you use a custom table name, set `SUPABASE_TABLE` to match.
+
+`SUPABASE_TABLE` and `SUPABASE_NAV_ROW_ID` are used together:
+- Example 1 (default): table `nav_store`, row `id = 1`
+- Example 2 (custom): table `portfolio_nav`, row `id = 42`
 
 Insert (or upsert) the row referenced by `SUPABASE_NAV_ROW_ID`:
 
