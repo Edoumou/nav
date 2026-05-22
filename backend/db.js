@@ -84,7 +84,7 @@ async function setNav(value) {
   }
 }
 
-async function compareAndSetNav(expected, nextValue) {
+async function updateNavIfMatches(expected, nextValue) {
   const { data, error } = await supabase
     .from(SUPABASE_TABLE)
     .update({ nav: nextValue.toString() })
@@ -102,14 +102,20 @@ async function compareAndSetNav(expected, nextValue) {
 
 async function mutateNavAtomic(mutate, operationName) {
   const maxRetries = 5;
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
     const row = await ensureRow();
     const current = parseNav(row.nav);
     const next = mutate(current);
 
-    const updated = await compareAndSetNav(current, next);
+    const updated = await updateNavIfMatches(current, next);
     if (updated) return next;
+
+    if (attempt < maxRetries) {
+      const backoffMs = 25 * 2 ** (attempt - 1);
+      await sleep(backoffMs);
+    }
   }
 
   throw new Error(
