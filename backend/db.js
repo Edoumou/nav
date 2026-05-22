@@ -84,6 +84,39 @@ async function setNav(value) {
   }
 }
 
+async function compareAndSetNav(expected, nextValue) {
+  const { data, error } = await supabase
+    .from(SUPABASE_TABLE)
+    .update({ nav: nextValue.toString() })
+    .eq("id", SUPABASE_NAV_ROW_ID)
+    .eq("nav", expected.toString())
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to update NAV: ${error.message}`);
+  }
+
+  return Boolean(data);
+}
+
+async function mutateNavAtomic(mutate, operationName) {
+  const maxRetries = 5;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
+    const row = await ensureRow();
+    const current = parseNav(row.nav);
+    const next = mutate(current);
+
+    const updated = await compareAndSetNav(current, next);
+    if (updated) return next;
+  }
+
+  throw new Error(
+    `Failed to ${operationName} NAV due to concurrent updates; please retry`
+  );
+}
+
 /**
  * Increment the NAV by delta.
  * @param {bigint|string} delta  Amount to add (must be positive).
@@ -91,7 +124,7 @@ async function setNav(value) {
 async function incrementNav(delta) {
   const bigDelta = BigInt(delta);
   if (bigDelta <= 0n) throw new RangeError("delta must be positive");
-  await setNav((await getNav()) + bigDelta);
+  await mutateNavAtomic((current) => current + bigDelta, "increment");
 }
 
 /**
@@ -102,8 +135,10 @@ async function incrementNav(delta) {
 async function decrementNav(delta) {
   const bigDelta = BigInt(delta);
   if (bigDelta <= 0n) throw new RangeError("delta must be positive");
-  const current = await getNav();
-  await setNav(current > bigDelta ? current - bigDelta : 0n);
+  await mutateNavAtomic(
+    (current) => (current > bigDelta ? current - bigDelta : 0n),
+    "decrement"
+  );
 }
 
 module.exports = { getNav, setNav, incrementNav, decrementNav };
