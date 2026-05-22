@@ -113,9 +113,9 @@ Key variables:
 | `CHAINLINK_DON_ID` | DON ID (Sepolia default pre-filled) |
 | `NAV_API_URL` | URL the DON fetches NAV from (must be publicly reachable for testnet) |
 | `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key used by the backend |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key used by the backend (Dashboard → Project Settings → API → `service_role`) |
 | `SUPABASE_TABLE` | Supabase table storing NAV (`nav_store` by default) |
-| `SUPABASE_NAV_ROW_ID` | Single row id used by the backend (`1` by default) |
+| `SUPABASE_NAV_ROW_ID` | Single row id used by the backend (the row's `id` value, `1` by default) |
 | `MONITORED_WALLET` | Address whose transactions update NAV |
 | `LISTENER_RPC_URL` | WebSocket or HTTP RPC for the wallet listener |
 | `ERC20_ADDRESSES` | Comma-separated ERC-20 contract addresses to watch |
@@ -132,6 +132,14 @@ create table if not exists public.nav_store (
 ```
 
 If you use a custom table name, set `SUPABASE_TABLE` to match.
+
+Insert (or upsert) the row referenced by `SUPABASE_NAV_ROW_ID`:
+
+```sql
+insert into public.nav_store (id, nav)
+values (1, '0')
+on conflict (id) do update set nav = excluded.nav;
+```
 
 ### 4. Compile contracts
 
